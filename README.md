@@ -7,13 +7,13 @@ A library for point cloud object removal, surface interpolation, and void fillin
 ### Point Cloud Manipulation
 
 The main API of this repo is managed through a single **PointCloudModifier** instance, most of the methods listed below exist on an instance of **PointCloudModifier**.
-Some methods, like **z_order_cloud** (which reorders the points in your point-cloud to conform to a z order for subsequent performance) exist as standalone functions as well, but are mostly undocumented as the main functionality lies with removing sections of a point-cloud according to a polygon, flattening geometry of a point-cloud to ground surface inside a polygon as well as some minor methods to remove and replace geometry inside removal polygons if so desired.
+Some methods, like **z_order_cloud** (which reorders the points in your point-cloud to conform to a z order for subsequent performance on disk) exist as standalone functions as well, but are mostly undocumented as the main functionality lies with removing sections of a point-cloud according to a polygon, flattening geometry of a point-cloud to ground surface inside a polygon as well as some minor methods to remove and replace geometry inside removal polygons if so desired.
 
-an example usage:
+an example usage, note that masks can contain multiple polygons and that any filetype supported by geopandas is also supported for mask polygons:
 ```python
 point_modifier = utils.PointCloudModifier()
 
-b = point_modifier.z_flatten_poly(las_file=file , poly_mask=poly , zero_attributes=False  , output_path="s.laz")
+b = point_modifier.z_flatten_poly(las_file=file , poly_mask="path_to_poly(s).shp , zero_attributes=False  , output_path="s.laz")
 ```
 
 **`summary_poly_removal(las_file, poly_mask, output_path=None) -> laspy.LasData`**
@@ -23,10 +23,6 @@ Removes all points and associated attributes within provided 2D/3D Shapely polyg
 **`z_flatten_poly(las_file, poly_mask, output_path=None, ...) -> laspy.LasData`**
 Flattens all points within a polygon to the expected ground surface using linear TIN interpolation. Optionally resets attributes or marks points as withheld.
 *   **Args:** `las_file`, `poly_mask`, `output_path`, `ground_class` (Default: 2), `mark_as_withhed` (bool), `mark_as_ground_surface` (bool), `zero_attributes` (bool), `mark_as_first_return` (bool).
-
-**`fill_void_polygon(las_file, removal_polygon, interp_method="linear", fill_method="kde", buffer_dist=20, ground_class=2) -> PolygonExcision`**
-Excises points bounded by polygons and reinterpolates the void using ground points to match surrounding terrain geometry.
-*   **Args:** `las_file`, `removal_polygon`, `interp_method` (`linear`|`cubic`|`nn`), `fill_method` (`kde`|`exemplar`), `buffer_dist`, `ground_class`.
 
 **`excise_and_patch_polygon_stat(las_file, poly_mask, output_path=None, ...) -> laspy.LasData`**
 Excises points within a 2D polygon and refills the void using interpolated ground surfaces (Z) and generated geometry (XY). Reinterpolates or zeroes attributes and optionally Z-order sorts the output cloud.
